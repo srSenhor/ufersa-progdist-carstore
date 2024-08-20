@@ -1,4 +1,4 @@
-package br.edu.ufersa.server.services;
+package br.edu.ufersa.services;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -11,9 +11,9 @@ import br.edu.ufersa.entities.SessionLogin;
 import br.edu.ufersa.entities.User;
 import br.edu.ufersa.security.RSAImpl;
 import br.edu.ufersa.security.SecurityCipher;
-import br.edu.ufersa.server.services.skeletons.AuthService;
-import br.edu.ufersa.server.services.skeletons.DealerService;
-import br.edu.ufersa.server.services.skeletons.SessionService;
+import br.edu.ufersa.services.skeletons.AuthService;
+import br.edu.ufersa.services.skeletons.DealerService;
+import br.edu.ufersa.services.skeletons.SessionService;
 import br.edu.ufersa.utils.RSAKey;
 import br.edu.ufersa.utils.ServicePorts;
 import br.edu.ufersa.utils.UserType;

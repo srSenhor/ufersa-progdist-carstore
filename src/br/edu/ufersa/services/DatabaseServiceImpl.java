@@ -1,4 +1,4 @@
-package br.edu.ufersa.server.services;
+package br.edu.ufersa.services;
 
 import java.rmi.RemoteException;
 import java.util.Comparator;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import br.edu.ufersa.entities.Car;
-import br.edu.ufersa.server.services.skeletons.DatabaseService;
+import br.edu.ufersa.services.skeletons.DatabaseService;
 import br.edu.ufersa.utils.CarType;
 
 public class DatabaseServiceImpl implements DatabaseService {

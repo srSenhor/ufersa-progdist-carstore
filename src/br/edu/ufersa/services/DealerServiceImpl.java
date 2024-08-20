@@ -1,4 +1,4 @@
-package br.edu.ufersa.server.services;
+package br.edu.ufersa.services;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -19,9 +19,9 @@ import br.edu.ufersa.entities.Message;
 import br.edu.ufersa.entities.Request;
 import br.edu.ufersa.security.RSAImpl;
 import br.edu.ufersa.security.SecurityCipher;
-import br.edu.ufersa.server.services.skeletons.DatabaseService;
-import br.edu.ufersa.server.services.skeletons.DealerService;
-import br.edu.ufersa.server.services.skeletons.SessionService;
+import br.edu.ufersa.services.skeletons.DatabaseService;
+import br.edu.ufersa.services.skeletons.DealerService;
+import br.edu.ufersa.services.skeletons.SessionService;
 import br.edu.ufersa.utils.CarType;
 import br.edu.ufersa.utils.RSAKey;
 import br.edu.ufersa.utils.ServicePorts;
@@ -43,9 +43,9 @@ public class DealerServiceImpl implements DealerService {
             return null;
         }
         
-        RSAKey clientPuKey = sessionStub.getRSAKey(username);
+        RSAKey clientPublicKey = sessionStub.getRSAKey(username);
 
-        String receivedHash = rsa.checkSign(message.getHash(), clientPuKey);
+        String receivedHash = rsa.checkSign(message.getHash(), clientPublicKey);
         SecurityCipher bc = null;
         String content = "";
 
@@ -83,19 +83,19 @@ public class DealerServiceImpl implements DealerService {
         if (req.getUserType().getValue() == 0) {
             switch (req.getOperationType()) {
                 case 1:
-                    response = (req.getCategory().getValue() == 1) ? 
+                    response = (req.getSelectedOption()  == 1) ? 
                     this.searchByRenavam(req, bc) : 
                     this.searchByName(req, bc);
 
                     break;
                 case 2:
-                    response = (req.getCategory().getValue() == 1) ? 
+                    response = (req.getSelectedOption()  == 1) ? 
                     this.list(req, bc) : 
                     this.listByCategory(req, bc);
 
                     break;
                 case 3:
-                    response = (req.getCategory().getValue()== 1) ? 
+                    response = (req.getSelectedOption() == 1) ? 
                     this.stock(req, bc) : 
                     this.stockByName(req, bc);
 
@@ -110,19 +110,19 @@ public class DealerServiceImpl implements DealerService {
         } else if (req.getUserType().getValue() == 1) {
             switch (req.getOperationType()) {
                 case 1:
-                    response = (req.getCategory().getValue() == 1) ? 
+                    response = (req.getSelectedOption()  == 1) ? 
                     this.searchByRenavam(req, bc) : 
                     this.searchByName(req, bc);
 
                     break;
                 case 2:
-                    response = (req.getCategory().getValue() == 1) ? 
+                    response = (req.getSelectedOption()  == 1) ? 
                     this.list(req, bc) : 
                     this.listByCategory(req, bc);
 
                     break;
                 case 3:
-                    response = (req.getCategory().getValue() == 1) ? 
+                    response = (req.getSelectedOption()  == 1) ? 
                     this.stock(req, bc) : 
                     this.stockByName(req, bc);
 
@@ -233,15 +233,21 @@ public class DealerServiceImpl implements DealerService {
             
             for (Car car : carList) {
 
-                CarType carType = car.getCategory();
-
-                if (carType.compareTo(CarType.ECONOMY) == 0) {
-                    economyCars.add(car);
-                } else if (carType.compareTo(CarType.INTERMEDIATE) == 0) {
-                    intermediateCars.add(car);
-                } else {
-                    executiveCars.add(car);
+                switch (car.getCategory()) {
+                    case ECONOMY:
+                        economyCars.add(car);                    
+                        break;
+                    case INTERMEDIATE:
+                        intermediateCars.add(car);
+                        break;
+                    case EXECUTIVE:
+                        executiveCars.add(car);
+                        break;
+                    default:
+                        System.err.println("DEALER: This type of car doesn't exist");
+                        break;
                 }
+
             }
 
             StringBuilder responseString = new StringBuilder();
@@ -282,7 +288,7 @@ public class DealerServiceImpl implements DealerService {
     private Message add(Request req, SecurityCipher bc) throws RemoteException {
         Message response = new Message("", "");
 
-        boolean attempt = dbStub.create(req.getCategory(), req.getRenavam(), req.getName(), req.getProductionYear(), req.getPrice());
+        boolean attempt = dbStub.create(convert(req.getSelectedOption()), req.getRenavam(), req.getName(), req.getProductionYear(), req.getPrice());
         
         if (attempt) {
             response.setContent("Successfully add the car\nPlease check the stock");
@@ -314,7 +320,7 @@ public class DealerServiceImpl implements DealerService {
     private Message update(Request req, SecurityCipher bc) throws RemoteException {        
         Message response  = new Message("", "");
         
-        boolean attempt = dbStub.update(req.getCategory(), req.getRenavam(), req.getName(), req.getProductionYear(), req.getPrice());
+        boolean attempt = dbStub.update(convert(req.getSelectedOption()), req.getRenavam(), req.getName(), req.getProductionYear(), req.getPrice());
 
         if (attempt) {
             response.setContent("Successfully update the car\nPlease check the stock");
@@ -414,6 +420,19 @@ public class DealerServiceImpl implements DealerService {
             e.printStackTrace();
         } catch (BadPaddingException e) {
             e.printStackTrace();
+        }
+    }
+
+    private CarType convert(int value) {
+        switch (value) {
+            case 0:
+                return CarType.ECONOMY;
+            case 1:
+                return CarType.INTERMEDIATE;
+            case 2:
+                return CarType.EXECUTIVE;            
+            default:
+                return CarType.UNDEFINED;
         }
     }
 
