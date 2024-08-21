@@ -28,12 +28,14 @@ public class Client implements Serializable {
     protected UserType userType;
     protected SessionLogin sessionLogin;
     protected DealerService dealerStub;
+    protected int serviceId;
 
     public Client () {}
 
-    public Client(SessionLogin sessionLogin) {
+    public Client(SessionLogin sessionLogin, int serviceId) {
         this.sessionLogin = sessionLogin;
         this.userType = UserType.CLIENT;
+        this.serviceId = serviceId;
         this.exec();
     }
 
@@ -56,8 +58,8 @@ public class Client implements Serializable {
             op = 0;
 
 
-            Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.DEALER_PORT.getValue());
-            this.dealerStub = (DealerService) reg.lookup("Dealer");
+            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + serviceId );
+            this.dealerStub = (DealerService) reg.lookup( "Dealer" + serviceId );
             // Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.PROXY_PORT.getValue());
             // this.proxy = (Proxy) reg.lookup("Proxy");
             
@@ -200,8 +202,6 @@ public class Client implements Serializable {
 
     protected String send(int operationType, String username, long renavam, String name, int productionYear, float price, int category) {
 
-        
-
         String request = new Request(operationType, userType, category, renavam, name, username, productionYear, price).toString();
         String response = "";
 
@@ -228,7 +228,6 @@ public class Client implements Serializable {
                 }
                 
             }
-
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

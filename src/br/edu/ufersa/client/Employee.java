@@ -17,9 +17,10 @@ public class Employee extends Client {
 
     public Employee() {}
 
-    public Employee(SessionLogin sessionLogin) {
+    public Employee(SessionLogin sessionLogin, int serviceId) {
         this.sessionLogin = sessionLogin;
         this.userType = UserType.EMPLOYEE;
+        this.serviceId = serviceId;
         this.exec();
     }
 
@@ -35,8 +36,8 @@ public class Employee extends Client {
             op = 0;
 
 
-            Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.DEALER_PORT.getValue());
-            this.dealerStub = (DealerService) reg.lookup("Dealer");
+            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + serviceId );
+            this.dealerStub = (DealerService) reg.lookup( "Dealer" + serviceId );
             // Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.PROXY_PORT.getValue());
             // this.proxy = (Proxy) reg.lookup("Proxy");
             

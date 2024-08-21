@@ -23,10 +23,18 @@ public class AuthServiceImpl implements AuthService {
     private static HashMap<String, User> users;
     private static SessionService sessionStub;
     private static DealerService dealerStub;
-    private static RSAKey serverPuKey;
+    private static RSAKey serverPublicKey;
+    private int servicesId;
 
     public AuthServiceImpl() {
         users = new HashMap<>();
+        this.servicesId = 0;
+        this.init();
+    }
+
+    public AuthServiceImpl(int servicesId) {
+        users = new HashMap<>();
+        this.servicesId = servicesId;
         this.init();
     }
 
@@ -46,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
             try {
 
                 bc = new SecurityCipher();
-                login = new SessionLogin(user.getUsername(), user.getType(), new RSAImpl(), serverPuKey, bc.getKey());
+                login = new SessionLogin(user.getUsername(), user.getType(), new RSAImpl(), serverPublicKey, bc.getKey());
             
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
@@ -85,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
         try {
 
             bc = new SecurityCipher();
-            login = new SessionLogin(user.getUsername(), user.getType(), new RSAImpl(), serverPuKey, bc.getKey());
+            login = new SessionLogin(user.getUsername(), user.getType(), new RSAImpl(), serverPublicKey, bc.getKey());
         
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -111,12 +119,12 @@ public class AuthServiceImpl implements AuthService {
     private void init(){
         try {
 
-            Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.SESSION_PORT.getValue());
-            sessionStub = (SessionService) reg.lookup("Session");
-            Registry dealReg = LocateRegistry.getRegistry("localhost", ServicePorts.DEALER_PORT.getValue());
-            dealerStub = (DealerService) dealReg.lookup("Dealer");
+            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.SESSION_PORT.getValue() + servicesId );
+            sessionStub = (SessionService) reg.lookup("Session" + servicesId);
+            Registry dealReg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + servicesId );
+            dealerStub = (DealerService) dealReg.lookup("Dealer" + servicesId);
 
-            serverPuKey = dealerStub.getPuKey();
+            serverPublicKey = dealerStub.getPuKey();
 
             logout(signup("babaganush", "senha123", UserType.CLIENT));
             logout(signup("silvao", "senha456", UserType.EMPLOYEE));
@@ -124,7 +132,6 @@ public class AuthServiceImpl implements AuthService {
         } catch (RemoteException e) {
             e.printStackTrace();
         } catch (NotBoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

@@ -63,9 +63,9 @@ public class DatabaseServiceImpl implements DatabaseService {
 
         StringBuilder responseString = new StringBuilder();
     
-        responseString.append("""
-                = = = = = =  CAR STOCK  = = = = = =
-                """);
+        // responseString.append("""
+        //         = = = = = =  CAR STOCK  = = = = = =
+        //         """);
 
         carsStock.forEach((String name, Integer quant) -> {
             responseString.append(name);
@@ -74,9 +74,9 @@ public class DatabaseServiceImpl implements DatabaseService {
             responseString.append("\n");
         });
 
-        responseString.append("""
-                = = = = = = = = = = = = = = = = = =
-                """);
+        // responseString.append("""
+        //         = = = = = = = = = = = = = = = = = =
+        //         """);
         
         System.out.println("DATABASE: Sending stock");
         return responseString.toString();

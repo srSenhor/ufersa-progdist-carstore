@@ -31,9 +31,17 @@ public class DealerServiceImpl implements DealerService {
     private static DatabaseService dbStub;
     private static SessionService sessionStub;
     private static RSAImpl rsa;
+    private int servicesId;
 
     public DealerServiceImpl() {
         rsa = new RSAImpl();
+        this.servicesId = 0;
+        this.init();
+    }
+
+    public DealerServiceImpl(int servicesId) {
+        rsa = new RSAImpl();
+        this.servicesId = servicesId;
         this.init();
     }
 
@@ -336,6 +344,7 @@ public class DealerServiceImpl implements DealerService {
     private Message stock(Request req, SecurityCipher bc) throws RemoteException {
         Message response = new Message("", "");
 
+        // TODO: Arrumar a exibição de stock no caso de ser só um, criando um outro método suponho eu
         String quantity = dbStub.getStock();
 
         if (quantity == null) {
@@ -439,10 +448,10 @@ public class DealerServiceImpl implements DealerService {
     private void init() {
         try {
 
-            Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.SESSION_PORT.getValue());
-            sessionStub = (SessionService) reg.lookup("Session");
-            Registry dbReg = LocateRegistry.getRegistry("localhost", ServicePorts.DATABASE_PORT.getValue());
-            dbStub = (DatabaseService) dbReg.lookup("Database");
+            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.SESSION_PORT.getValue() + servicesId );
+            sessionStub = (SessionService) reg.lookup("Session" + servicesId);
+            Registry dbReg = LocateRegistry.getRegistry( "localhost", ServicePorts.DATABASE_PORT.getValue() + servicesId );
+            dbStub = (DatabaseService) dbReg.lookup("Database" + servicesId);
             
         } catch (RemoteException e) {
             e.printStackTrace();

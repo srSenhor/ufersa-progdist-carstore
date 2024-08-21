@@ -14,7 +14,15 @@ import br.edu.ufersa.utils.UserType;
 
 public class ClientApp {
 
+    private int serverId;
+
     public ClientApp() {
+        this.serverId = 0;
+        this.init();
+    }
+
+    public ClientApp(int serverId) {
+        this.serverId = serverId;
         this.init();
     }
 
@@ -28,8 +36,8 @@ public class ClientApp {
             cin = new Scanner(System.in);
             trying = false;
 
-            Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.AUTH_PORT.getValue());
-            AuthService stub = (AuthService) reg.lookup("Auth");
+            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.AUTH_PORT.getValue() + serverId );
+            AuthService stub = (AuthService) reg.lookup("Auth" + serverId );
 
             SessionLogin userLogin;
 
@@ -87,14 +95,13 @@ public class ClientApp {
     }
 
       private void mainMenu(SessionLogin sessionLogin){
-        // TODO Verificar porque ele não consegue passar do login, suspeito que seja a porta que eu usei
 
         switch (sessionLogin.getType()) {
             case CLIENT:
-                new Client(sessionLogin);
+                new Client(sessionLogin, serverId);
                 break;
             case EMPLOYEE:
-                new Employee(sessionLogin);
+                new Employee(sessionLogin, serverId);
                 break;
             default:
                 System.err.println("Undefined type");
