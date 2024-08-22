@@ -12,17 +12,27 @@ import br.edu.ufersa.utils.CarType;
 
 public class DatabaseServiceImpl implements DatabaseService {
 
-    // TODO: Implementar Singleton 
     // TODO: Usar Lock e Unlock por aqui
 
     private static ConcurrentHashMap<Long, Car> cars;
     private static ConcurrentHashMap<String, Integer> carsStock;
+    private static DatabaseServiceImpl instance;
     
-    public DatabaseServiceImpl() {
+    private DatabaseServiceImpl() {
         cars = new ConcurrentHashMap<>();
         carsStock = new ConcurrentHashMap<>();
 
         this.init();
+    }
+
+    public static DatabaseServiceImpl getInstance() {
+        
+        if (instance == null) {
+            instance = new DatabaseServiceImpl();
+        }
+
+        return instance;
+
     }
 
     public Car find(long renavam) {

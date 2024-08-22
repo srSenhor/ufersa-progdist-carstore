@@ -12,6 +12,11 @@ import br.edu.ufersa.utils.ServicePorts;
 
 public class CarDatabaseService {
 
+    // // private static final int serverId = 1;
+    // private static final int serverId = 2;
+    // // private static final int serverId = 3;
+    
+    // private static CarDatabaseService instance;
     private int serverId;
 
     public CarDatabaseService(int id) {
@@ -19,13 +24,21 @@ public class CarDatabaseService {
         this.exec(); 
     }
 
+    // public static CarDatabaseService getInstance(/*int serverId*/) {
+        
+    //     if (instance == null) instance = new CarDatabaseService(/*serverId*/);
+
+    //     return instance;
+    // }
+
+    // public static void main(String[] args) {
     private void exec() {
         
         try {
 
              // ------------------------------- Serviço de banco de dados --------------------------------------------
 
-            DatabaseServiceImpl databaseObjRef = new DatabaseServiceImpl();
+            DatabaseServiceImpl databaseObjRef = DatabaseServiceImpl.getInstance();
             DatabaseService databaseSkeleton = (DatabaseService) UnicastRemoteObject.exportObject(databaseObjRef, 0);
 
             LocateRegistry.createRegistry( ServicePorts.DATABASE_PORT.getValue() + serverId );

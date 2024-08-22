@@ -1,14 +1,15 @@
 package br.edu.ufersa.app;
 
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 import br.edu.ufersa.client.Client;
 import br.edu.ufersa.client.Employee;
 import br.edu.ufersa.entities.SessionLogin;
+import br.edu.ufersa.loadbalance.LoadBalance;
+import br.edu.ufersa.loadbalance.RandomBalance;
 import br.edu.ufersa.services.skeletons.AuthService;
 import br.edu.ufersa.utils.GUI;
+import br.edu.ufersa.utils.RegStubWrapper;
 import br.edu.ufersa.utils.ServicePorts;
 import br.edu.ufersa.utils.UserType;
 
@@ -17,7 +18,7 @@ public class ClientApp {
     private int serverId;
 
     public ClientApp() {
-        this.serverId = 0;
+        // this.serverId = 0;
         this.init();
     }
 
@@ -36,8 +37,38 @@ public class ClientApp {
             cin = new Scanner(System.in);
             trying = false;
 
-            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.AUTH_PORT.getValue() + serverId );
-            AuthService stub = (AuthService) reg.lookup("Auth" + serverId );
+            LoadBalance<AuthService> loadBalancer = new RandomBalance<>();
+
+            // LoadBalance<AuthService> random = (wrapper, serviceName, service, serverQuantity) -> {
+
+            //     int serverId = ((int) new Random().nextInt(serverQuantity - 1)) + 1;
+
+            //     try {
+
+            //         Registry reg = LocateRegistry.getRegistry( "localhost", service.getValue() + serverId );
+            //         AuthService stub = (AuthService) reg.lookup(serviceName + serverId );
+
+            //         wrapper.setRegistry(reg);
+            //         wrapper.setServiceStub(stub);
+
+            //     } catch (RemoteException e) {
+            //         e.printStackTrace();
+            //     } catch (NotBoundException e) {
+            //         e.printStackTrace();
+            //     }
+
+            // };
+            
+            RegStubWrapper<AuthService> wrapper = new RegStubWrapper<AuthService>(null, null);
+
+            // Registry reg = null;
+            // AuthService stub = null;
+
+            loadBalancer.balance(wrapper, ServicePorts.AUTH_PORT, "Auth", 3);
+            // random.balance(wrapper, ServicePorts.AUTH_PORT, 3);
+
+            AuthService stub = wrapper.getServiceStub();
+
 
             SessionLogin userLogin;
 

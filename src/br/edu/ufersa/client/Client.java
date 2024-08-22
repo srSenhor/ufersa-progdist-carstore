@@ -2,8 +2,6 @@ package br.edu.ufersa.client;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -16,9 +14,12 @@ import javax.crypto.NoSuchPaddingException;
 import br.edu.ufersa.entities.Message;
 import br.edu.ufersa.entities.Request;
 import br.edu.ufersa.entities.SessionLogin;
+import br.edu.ufersa.loadbalance.LoadBalance;
+import br.edu.ufersa.loadbalance.RandomBalance;
 import br.edu.ufersa.security.SecurityCipher;
 import br.edu.ufersa.services.skeletons.DealerService;
 import br.edu.ufersa.utils.GUI;
+import br.edu.ufersa.utils.RegStubWrapper;
 import br.edu.ufersa.utils.ServicePorts;
 import br.edu.ufersa.utils.UserType;
 
@@ -35,7 +36,7 @@ public class Client implements Serializable {
     public Client(SessionLogin sessionLogin, int serviceId) {
         this.sessionLogin = sessionLogin;
         this.userType = UserType.CLIENT;
-        this.serviceId = serviceId;
+        // this.serviceId = serviceId;
         this.exec();
     }
 
@@ -56,12 +57,6 @@ public class Client implements Serializable {
 
             cin = new Scanner(System.in);
             op = 0;
-
-
-            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + serviceId );
-            this.dealerStub = (DealerService) reg.lookup( "Dealer" + serviceId );
-            // Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.PROXY_PORT.getValue());
-            // this.proxy = (Proxy) reg.lookup("Proxy");
             
             do {
                 GUI.clearScreen();
@@ -201,6 +196,36 @@ public class Client implements Serializable {
 
 
     protected String send(int operationType, String username, long renavam, String name, int productionYear, float price, int category) {
+
+        // TODO: Definir o stub do serviço de carros aqui, com o balanceador de carga
+
+        // LoadBalance<DealerService> random = (wrapper, service, serverQuantity) -> {
+
+        //         int serviceId = ((int) new Random().nextInt(serverQuantity - 1)) + 1;
+
+        //         try {
+
+        //             Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + serviceId );
+        //             DealerService stub = (DealerService) reg.lookup( "Dealer" + serviceId );
+
+        //             wrapper.setRegistry(reg);
+        //             wrapper.setServiceStub(stub);
+
+        //         } catch (RemoteException e) {
+        //             e.printStackTrace();
+        //         } catch (NotBoundException e) {
+        //             e.printStackTrace();
+        //         }
+
+        // };
+
+        LoadBalance<DealerService> random = new RandomBalance<>();
+        RegStubWrapper<DealerService> wrapper = new RegStubWrapper<DealerService>(null, null);
+
+        random.balance(wrapper, ServicePorts.DEALER_PORT, "Dealer", 3);
+
+        dealerStub = wrapper.getServiceStub();
+
 
         String request = new Request(operationType, userType, category, renavam, name, username, productionYear, price).toString();
         String response = "";
