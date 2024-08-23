@@ -19,8 +19,9 @@ O que tiver riscado e com um ❌ eu já concluí.
 - [x] Usar *lambda expressions* e interfaces funcionais quando for possível e aplicável
 - [ ] Simular o balanceamento de carga de requisições com 3 algoritmos dos que foram apresentados no documento
   - [ ] Implementar e testar o *Round Robin*
-  - [ ] Implementar e testar o *Consistent Hashing*
+  - [ ] ~~Implementar e testar o *Consistent Hashing*~~
   - [x] Implementar e testar o *Random*
+  - [x] Implementar e testar o *Least Connections*
 
 ## Propostas de solução
 
