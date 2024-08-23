@@ -8,9 +8,7 @@ public class RandomBalance implements LoadBalance {
 
     @Override
     public int balance(ServerListWrapper serverList) {
-        return new Random().nextInt(serverList.getServerList().size() - 1) + 1;
+        return new Random().nextInt(serverList.getServerList().size()) + 1;
     }
-
-    
     
 }

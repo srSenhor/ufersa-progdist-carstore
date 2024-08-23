@@ -11,8 +11,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import br.edu.ufersa.entities.Message;
 import br.edu.ufersa.entities.SessionLogin;
+import br.edu.ufersa.loadbalance.LeastConnectionsBalance;
 import br.edu.ufersa.loadbalance.LoadBalance;
 import br.edu.ufersa.loadbalance.RandomBalance;
+import br.edu.ufersa.loadbalance.RoundRobinBalance;
 import br.edu.ufersa.services.implementations.skeletons.AuthService;
 import br.edu.ufersa.services.implementations.skeletons.DealerService;
 import br.edu.ufersa.utils.ServerListWrapper;
@@ -32,7 +34,9 @@ public class GatewayServiceImpl implements GatewayService {
         nServers = serverQuantity;
         servicesList = new ServerListWrapper(serverQuantity);
         lock = new ReentrantReadWriteLock();
-        algorithm = new RandomBalance();
+        // algorithm = new RandomBalance();
+        // algorithm = new RoundRobinBalance();
+        algorithm = new LeastConnectionsBalance();
         this.init(); 
     }
 
@@ -40,6 +44,7 @@ public class GatewayServiceImpl implements GatewayService {
     public boolean redirectAuth(SessionLogin login) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -47,6 +52,8 @@ public class GatewayServiceImpl implements GatewayService {
         boolean sucessfulLogout = authStubs.get(serviceId).logout(login);
 
         if (sucessfulLogout) {
+
+            System.out.println("GATEWAY: successfuly logged out, sending broadcast to others copies...");
 
             for (int i = 1; i <= authStubs.size(); i++) {
                 if (i != serviceId) {
@@ -70,6 +77,7 @@ public class GatewayServiceImpl implements GatewayService {
     public SessionLogin redirectAuth(String username, String password, UserType userType) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -77,6 +85,8 @@ public class GatewayServiceImpl implements GatewayService {
         SessionLogin login = authStubs.get(serviceId).signup(username, password, userType);
 
         if (login != null) {
+
+            System.out.println("GATEWAY: new user was successfuly registred, sending broadcast to others copies...");
 
             for (int i = 1; i <= authStubs.size(); i++) {
                 if (i != serviceId) {
@@ -100,6 +110,7 @@ public class GatewayServiceImpl implements GatewayService {
     public SessionLogin redirectAuth(String username, String password) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -107,6 +118,8 @@ public class GatewayServiceImpl implements GatewayService {
         SessionLogin login = authStubs.get(serviceId).auth(username, password);
 
         if (login != null) {
+
+            System.out.println("GATEWAY: sucessful logged in, sending broadcast to others copies...");
 
             for (int i = 1; i <= authStubs.size(); i++) {
                 if (i != serviceId) {
@@ -130,6 +143,7 @@ public class GatewayServiceImpl implements GatewayService {
     public Message redirectDealer(String username, Message message) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -137,6 +151,8 @@ public class GatewayServiceImpl implements GatewayService {
         Message response = dealerStubs.get(serviceId).receive(username, message);
 
         if (response != null) {
+
+            System.out.println("GATEWAY: sucessfully received message, sending broadcast to others copies...");
 
             for (int i = 1; i <= dealerStubs.size(); i++) {
                 if (i != serviceId) {
