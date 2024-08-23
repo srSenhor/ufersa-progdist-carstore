@@ -14,13 +14,9 @@ import javax.crypto.NoSuchPaddingException;
 import br.edu.ufersa.entities.Message;
 import br.edu.ufersa.entities.Request;
 import br.edu.ufersa.entities.SessionLogin;
-import br.edu.ufersa.loadbalance.LoadBalance;
-import br.edu.ufersa.loadbalance.RandomBalance;
 import br.edu.ufersa.security.SecurityCipher;
-import br.edu.ufersa.services.skeletons.DealerService;
+import br.edu.ufersa.server.gateway.GatewayService;
 import br.edu.ufersa.utils.GUI;
-import br.edu.ufersa.utils.RegStubWrapper;
-import br.edu.ufersa.utils.ServicePorts;
 import br.edu.ufersa.utils.UserType;
 
 public class Client implements Serializable {
@@ -28,15 +24,15 @@ public class Client implements Serializable {
     private static final long serialVersionUID = 1L;
     protected UserType userType;
     protected SessionLogin sessionLogin;
-    protected DealerService dealerStub;
+    protected GatewayService stub;
     protected int serviceId;
 
     public Client () {}
 
-    public Client(SessionLogin sessionLogin, int serviceId) {
+    public Client(SessionLogin sessionLogin, GatewayService stub) {
         this.sessionLogin = sessionLogin;
+        this.stub = stub;
         this.userType = UserType.CLIENT;
-        // this.serviceId = serviceId;
         this.exec();
     }
 
@@ -102,9 +98,9 @@ public class Client implements Serializable {
                         cin.nextLine();
                         break;
                 }
-            } while(op != 5);
 
-            
+            } while (op != 5);
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -197,36 +193,6 @@ public class Client implements Serializable {
 
     protected String send(int operationType, String username, long renavam, String name, int productionYear, float price, int category) {
 
-        // TODO: Definir o stub do serviço de carros aqui, com o balanceador de carga
-
-        // LoadBalance<DealerService> random = (wrapper, service, serverQuantity) -> {
-
-        //         int serviceId = ((int) new Random().nextInt(serverQuantity - 1)) + 1;
-
-        //         try {
-
-        //             Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + serviceId );
-        //             DealerService stub = (DealerService) reg.lookup( "Dealer" + serviceId );
-
-        //             wrapper.setRegistry(reg);
-        //             wrapper.setServiceStub(stub);
-
-        //         } catch (RemoteException e) {
-        //             e.printStackTrace();
-        //         } catch (NotBoundException e) {
-        //             e.printStackTrace();
-        //         }
-
-        // };
-
-        LoadBalance<DealerService> random = new RandomBalance<>();
-        RegStubWrapper<DealerService> wrapper = new RegStubWrapper<DealerService>(null, null);
-
-        random.balance(wrapper, ServicePorts.DEALER_PORT, "Dealer", 3);
-
-        dealerStub = wrapper.getServiceStub();
-
-
         String request = new Request(operationType, userType, category, renavam, name, username, productionYear, price).toString();
         String response = "";
 
@@ -238,8 +204,7 @@ public class Client implements Serializable {
             String hash = bc.genHash(request);           
             hash = this.sessionLogin.getSessionRSA().sign(hash);
 
-            // Message messageResponse = proxy.receive(this, operationType, new Message(request, hash));
-            Message messageResponse = dealerStub.receive(username, new Message(request, hash));
+            Message messageResponse = stub.redirectDealer(username, new Message(request, hash));
 
             if (messageResponse == null) {
                 response =  "cannot do this, please try again...'";

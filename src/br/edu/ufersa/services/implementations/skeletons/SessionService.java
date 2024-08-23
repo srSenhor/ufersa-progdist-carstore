@@ -1,4 +1,4 @@
-package br.edu.ufersa.services.skeletons;
+package br.edu.ufersa.services.implementations.skeletons;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

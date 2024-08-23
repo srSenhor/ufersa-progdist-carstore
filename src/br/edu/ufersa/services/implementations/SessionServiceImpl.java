@@ -1,4 +1,4 @@
-package br.edu.ufersa.services;
+package br.edu.ufersa.services.implementations;
 
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -6,7 +6,7 @@ import java.util.HashMap;
 import javax.crypto.SecretKey;
 
 import br.edu.ufersa.entities.SessionLogin;
-import br.edu.ufersa.services.skeletons.SessionService;
+import br.edu.ufersa.services.implementations.skeletons.SessionService;
 import br.edu.ufersa.utils.RSAKey;
 
 public class SessionServiceImpl implements SessionService {

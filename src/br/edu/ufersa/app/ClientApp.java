@@ -1,29 +1,20 @@
 package br.edu.ufersa.app;
 
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 import br.edu.ufersa.client.Client;
 import br.edu.ufersa.client.Employee;
 import br.edu.ufersa.entities.SessionLogin;
-import br.edu.ufersa.loadbalance.LoadBalance;
-import br.edu.ufersa.loadbalance.RandomBalance;
-import br.edu.ufersa.services.skeletons.AuthService;
+import br.edu.ufersa.server.gateway.GatewayService;
 import br.edu.ufersa.utils.GUI;
-import br.edu.ufersa.utils.RegStubWrapper;
 import br.edu.ufersa.utils.ServicePorts;
 import br.edu.ufersa.utils.UserType;
 
 public class ClientApp {
 
-    private int serverId;
-
     public ClientApp() {
-        // this.serverId = 0;
-        this.init();
-    }
-
-    public ClientApp(int serverId) {
-        this.serverId = serverId;
         this.init();
     }
 
@@ -37,38 +28,8 @@ public class ClientApp {
             cin = new Scanner(System.in);
             trying = false;
 
-            LoadBalance<AuthService> loadBalancer = new RandomBalance<>();
-
-            // LoadBalance<AuthService> random = (wrapper, serviceName, service, serverQuantity) -> {
-
-            //     int serverId = ((int) new Random().nextInt(serverQuantity - 1)) + 1;
-
-            //     try {
-
-            //         Registry reg = LocateRegistry.getRegistry( "localhost", service.getValue() + serverId );
-            //         AuthService stub = (AuthService) reg.lookup(serviceName + serverId );
-
-            //         wrapper.setRegistry(reg);
-            //         wrapper.setServiceStub(stub);
-
-            //     } catch (RemoteException e) {
-            //         e.printStackTrace();
-            //     } catch (NotBoundException e) {
-            //         e.printStackTrace();
-            //     }
-
-            // };
-            
-            RegStubWrapper<AuthService> wrapper = new RegStubWrapper<AuthService>(null, null);
-
-            // Registry reg = null;
-            // AuthService stub = null;
-
-            loadBalancer.balance(wrapper, ServicePorts.AUTH_PORT, "Auth", 3);
-            // random.balance(wrapper, ServicePorts.AUTH_PORT, 3);
-
-            AuthService stub = wrapper.getServiceStub();
-
+            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.GATEWAY_PORT.getValue() );
+            GatewayService stub = (GatewayService) reg.lookup( "Gateway" );
 
             SessionLogin userLogin;
 
@@ -89,10 +50,10 @@ public class ClientApp {
 
 
                 if (loginOperation == 1) {
-                    userLogin = stub.auth(username, password);
+                    userLogin = stub.redirectAuth(username, password);
                 } else {
                     // Os funcionários já são registrados no sistema por padrão
-                    userLogin = stub.signup(username, password, UserType.CLIENT);
+                    userLogin = stub.redirectAuth(username, password, UserType.CLIENT);
                 }
 
 
@@ -104,9 +65,9 @@ public class ClientApp {
                     System.out.println("Press any key to continue...");
                     cin.nextLine();
              
-                    mainMenu(userLogin);
+                    mainMenu(userLogin, stub);
 
-                    stub.logout(userLogin);
+                    stub.redirectAuth(userLogin);
                     System.out.println("Successful logged out!");
                 } else {
                     System.out.println("Failed to login, there is something wrong...");
@@ -125,14 +86,14 @@ public class ClientApp {
 
     }
 
-      private void mainMenu(SessionLogin sessionLogin){
+      private void mainMenu(SessionLogin sessionLogin, GatewayService stub){
 
         switch (sessionLogin.getType()) {
             case CLIENT:
-                new Client(sessionLogin, serverId);
+                new Client(sessionLogin, stub);
                 break;
             case EMPLOYEE:
-                new Employee(sessionLogin, serverId);
+                new Employee(sessionLogin, stub);
                 break;
             default:
                 System.err.println("Undefined type");

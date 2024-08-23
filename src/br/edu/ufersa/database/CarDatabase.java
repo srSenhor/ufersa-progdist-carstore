@@ -1,5 +1,7 @@
 package br.edu.ufersa.database;
 
+import br.edu.ufersa.services.Database;
+
 public class CarDatabase {
 
     // private static final int ID = 1;
@@ -12,10 +14,8 @@ public class CarDatabase {
         //     new CarDatabaseService(id);
         // }
     
-        new CarDatabaseService(ID);
-
-        // CarDatabaseService.getInstance().exec(ID);
-
+        new Database(ID);
+        
     }
 
 }

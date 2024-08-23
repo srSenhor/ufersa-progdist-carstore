@@ -1,14 +1,11 @@
 package br.edu.ufersa.client;
 
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 import br.edu.ufersa.entities.Message;
 import br.edu.ufersa.entities.SessionLogin;
-import br.edu.ufersa.services.skeletons.DealerService;
+import br.edu.ufersa.server.gateway.GatewayService;
 import br.edu.ufersa.utils.GUI;
-import br.edu.ufersa.utils.ServicePorts;
 import br.edu.ufersa.utils.UserType;
 
 public class Employee extends Client {
@@ -17,10 +14,10 @@ public class Employee extends Client {
 
     public Employee() {}
 
-    public Employee(SessionLogin sessionLogin, int serviceId) {
+public Employee(SessionLogin sessionLogin, GatewayService stub) {
         this.sessionLogin = sessionLogin;
+        this.stub = stub;
         this.userType = UserType.EMPLOYEE;
-        this.serviceId = serviceId;
         this.exec();
     }
 
@@ -34,12 +31,6 @@ public class Employee extends Client {
 
             cin = new Scanner(System.in);
             op = 0;
-
-
-            Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + serviceId );
-            this.dealerStub = (DealerService) reg.lookup( "Dealer" + serviceId );
-            // Registry reg = LocateRegistry.getRegistry("localhost", ServicePorts.PROXY_PORT.getValue());
-            // this.proxy = (Proxy) reg.lookup("Proxy");
             
             do {
                 GUI.clearScreen();
