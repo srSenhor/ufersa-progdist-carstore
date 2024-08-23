@@ -44,9 +44,9 @@ public class GatewayServiceImpl implements GatewayService {
         Lock wLock = lock.writeLock();
         wLock.lock();
 
-        authStubs.get(serviceId).logout(login);
+        boolean sucessfulLogout = authStubs.get(serviceId).logout(login);
 
-        if (authStubs.get(serviceId).logout(login)) {
+        if (sucessfulLogout) {
 
             for (int i = 1; i <= authStubs.size(); i++) {
                 if (i != serviceId) {
@@ -58,13 +58,11 @@ public class GatewayServiceImpl implements GatewayService {
                 }
             }
 
-            wLock.unlock();
-
-            return true;
-
         }
 
-        return false;
+        wLock.unlock();
+        
+        return sucessfulLogout;
 
     }
 
@@ -90,13 +88,11 @@ public class GatewayServiceImpl implements GatewayService {
                 }
             }
 
-            wLock.unlock();
-
-            return login;
-
         }
 
-        return null;
+        wLock.unlock();
+
+        return login;
 
     }
 
@@ -122,13 +118,11 @@ public class GatewayServiceImpl implements GatewayService {
                 }
             }
 
-            wLock.unlock();
-            
-            return login;
-
         }
 
-        return null;
+        wLock.unlock();
+
+        return login;
 
     }
 
@@ -154,11 +148,9 @@ public class GatewayServiceImpl implements GatewayService {
                 }
             }
 
-            wLock.unlock();
-
-            return response;
-
         }
+
+        wLock.unlock();
 
         return response;
 
