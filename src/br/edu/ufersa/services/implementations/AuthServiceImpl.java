@@ -111,9 +111,16 @@ public class AuthServiceImpl implements AuthService {
     public boolean logout(SessionLogin login) throws RemoteException {
         User user = users.get(login.getUsername());
         if (user == null || user.isLogged() == false ) { return false; }
+
         user.userLoggedOut();
         sessionStub.closeSession(login.getUsername());
+
         return true;
+    }
+
+    @Override
+    public void echo(SessionLogin login) throws RemoteException {
+        sessionStub.echo(login.getUsername(), login);
     }
 
     private void init(){
@@ -121,6 +128,8 @@ public class AuthServiceImpl implements AuthService {
 
             Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.SESSION_PORT.getValue() + servicesId );
             sessionStub = (SessionService) reg.lookup("Session" + servicesId);
+            // Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.SESSION_PORT.getValue() );
+            // sessionStub = (SessionService) reg.lookup( "Session" );
             Registry dealReg = LocateRegistry.getRegistry( "localhost", ServicePorts.DEALER_PORT.getValue() + servicesId );
             dealerStub = (DealerService) dealReg.lookup("Dealer" + servicesId);
 

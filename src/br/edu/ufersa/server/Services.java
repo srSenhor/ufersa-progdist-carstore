@@ -21,16 +21,20 @@ public class Services {
     // private static final int SERVICE_ID = 2;
     private static final int SERVICE_ID = 3;
 
+    // private static final int NUMBER_OF_THREADS = 3;
+    private static final int NUMBER_OF_THREADS = 4;
+
+
     public static void main(String[] args) {
 
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+        ExecutorService executor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
         Runnable finalAction = () -> {
             GUI.clearScreen();
             System.out.println("Services at port xxxx" + SERVICE_ID + " are already to use:");
         };
 
-        CyclicBarrier barrier = new CyclicBarrier(4, finalAction);
+        CyclicBarrier barrier = new CyclicBarrier(NUMBER_OF_THREADS, finalAction);
 
         Runnable auth = () -> {
             sleep(3000);

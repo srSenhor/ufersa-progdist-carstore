@@ -45,4 +45,10 @@ public class SessionServiceImpl implements SessionService {
         System.out.println("SESSION: Closed session -> user " + username);
     }
 
+    @Override
+    public void echo(String username, SessionLogin login) throws RemoteException {
+        sessionPublicKeys.put(username, login.getSessionRSA().getPublicKey());
+        sessionAesKeys.put(username, login.getAesKey());
+    }
+
 }

@@ -13,8 +13,6 @@ import br.edu.ufersa.entities.Message;
 import br.edu.ufersa.entities.SessionLogin;
 import br.edu.ufersa.loadbalance.LeastConnectionsBalance;
 import br.edu.ufersa.loadbalance.LoadBalance;
-import br.edu.ufersa.loadbalance.RandomBalance;
-import br.edu.ufersa.loadbalance.RoundRobinBalance;
 import br.edu.ufersa.services.implementations.skeletons.AuthService;
 import br.edu.ufersa.services.implementations.skeletons.DealerService;
 import br.edu.ufersa.utils.ServerListWrapper;
@@ -25,8 +23,9 @@ public class GatewayServiceImpl implements GatewayService {
 
     private static HashMap<Integer, AuthService> authStubs;
     private static HashMap<Integer, DealerService> dealerStubs;
-    private static ServerListWrapper servicesList;
     private static ReadWriteLock lock;
+    // private static ExecutorService executor;
+    private static ServerListWrapper servicesList;
     private static LoadBalance algorithm;
     private static int nServers;
 
@@ -34,9 +33,16 @@ public class GatewayServiceImpl implements GatewayService {
         nServers = serverQuantity;
         servicesList = new ServerListWrapper(serverQuantity);
         lock = new ReentrantReadWriteLock();
+        // executor = Executors.newFixedThreadPool(serverQuantity);
+
+        // -------------- Algoritmos de balanceamento de carga -----------
+
         // algorithm = new RandomBalance();
         // algorithm = new RoundRobinBalance();
         algorithm = new LeastConnectionsBalance();
+
+        // ---------------------------------------------------------------
+
         this.init(); 
     }
 
@@ -44,7 +50,7 @@ public class GatewayServiceImpl implements GatewayService {
     public boolean redirectAuth(SessionLogin login) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
-        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected to logout try");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -55,15 +61,15 @@ public class GatewayServiceImpl implements GatewayService {
 
             System.out.println("GATEWAY: successfuly logged out, sending broadcast to others copies...");
 
-            for (int i = 1; i <= authStubs.size(); i++) {
-                if (i != serviceId) {
+            for (int count = 1; count < authStubs.size(); count++) {
+                if (count != serviceId) {
                     try {
-                        authStubs.get(i).logout(login);
+                        authStubs.get(count).logout(login);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-                }
-            }
+                }             
+            };
 
         }
 
@@ -77,7 +83,7 @@ public class GatewayServiceImpl implements GatewayService {
     public SessionLogin redirectAuth(String username, String password, UserType userType) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
-        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected to authentication try");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -91,7 +97,7 @@ public class GatewayServiceImpl implements GatewayService {
             for (int i = 1; i <= authStubs.size(); i++) {
                 if (i != serviceId) {
                     try {
-                        authStubs.get(i).signup(username, password, userType);
+                        authStubs.get(i).echo(login);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -110,7 +116,7 @@ public class GatewayServiceImpl implements GatewayService {
     public SessionLogin redirectAuth(String username, String password) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
-        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected to login try");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -124,7 +130,7 @@ public class GatewayServiceImpl implements GatewayService {
             for (int i = 1; i <= authStubs.size(); i++) {
                 if (i != serviceId) {
                     try {
-                        authStubs.get(i).auth(username, password);
+                        authStubs.get(i).echo(login);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -143,7 +149,7 @@ public class GatewayServiceImpl implements GatewayService {
     public Message redirectDealer(String username, Message message) throws RemoteException {
         
         int serviceId = algorithm.balance(servicesList);
-        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected");
+        System.out.println("GATEWAY: service on port xxxx" + serviceId + " was selected to car service try");
 
         Lock wLock = lock.writeLock();
         wLock.lock();
@@ -157,7 +163,7 @@ public class GatewayServiceImpl implements GatewayService {
             for (int i = 1; i <= dealerStubs.size(); i++) {
                 if (i != serviceId) {
                     try {
-                        dealerStubs.get(i).receive(username, message);
+                        dealerStubs.get(i).echo(username, message);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }

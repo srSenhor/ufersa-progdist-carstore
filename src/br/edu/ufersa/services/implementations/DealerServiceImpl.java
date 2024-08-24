@@ -46,7 +46,8 @@ public class DealerServiceImpl implements DealerService {
     }
 
     @Override
-    public Message receive(String username, Message message) throws RemoteException {               
+    public Message receive(String username, Message message) throws RemoteException { 
+
         if (message == null || message.getContent() == null || message.getHash() == null) {
             return null;
         }
@@ -159,6 +160,53 @@ public class DealerServiceImpl implements DealerService {
         }
 
         return response;
+
+    }
+
+    @Override 
+    public void echo(String username, Message message) throws RemoteException {
+
+        RSAKey clientPublicKey = sessionStub.getRSAKey(username);
+
+        String receivedHash = rsa.checkSign(message.getHash(), clientPublicKey);
+        SecurityCipher bc = null;
+        String content = "";
+
+        
+        try {
+            bc = new SecurityCipher(sessionStub.getAESKey(username));
+            
+            if(bc.genHash(message.getContent()).equals(receivedHash)) {
+                content = bc.dec(message.getContent());
+            }
+
+        } catch (NoSuchAlgorithmException | RemoteException | InvalidKeyException | NoSuchPaddingException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+        
+        Request req = Request.fromString(content);
+        
+        switch (req.getOperationType()) {
+            case 4:
+                this.buy(req, bc);
+                
+                return;
+            case 5:
+                this.add(req, bc);
+
+                return;
+            case 6:
+                this.update(req, bc);
+        
+                return;
+            case 7:
+                this.remove(req, bc);
+
+                return;
+            default:
+                return;
+        }
+
     }
 
     @Override
@@ -450,6 +498,8 @@ public class DealerServiceImpl implements DealerService {
 
             Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.SESSION_PORT.getValue() + servicesId );
             sessionStub = (SessionService) reg.lookup("Session" + servicesId);
+            // Registry reg = LocateRegistry.getRegistry( "localhost", ServicePorts.SESSION_PORT.getValue() );
+            // sessionStub = (SessionService) reg.lookup( "Session" );
             Registry dbReg = LocateRegistry.getRegistry( "localhost", ServicePorts.DATABASE_PORT.getValue() + servicesId );
             dbStub = (DatabaseService) dbReg.lookup("Database" + servicesId);
             

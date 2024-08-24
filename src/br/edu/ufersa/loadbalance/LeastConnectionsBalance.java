@@ -30,5 +30,12 @@ public class LeastConnectionsBalance implements LoadBalance {
         return leastConnectionsServer;
 
     }
+
+    public void disconnect(ServerListWrapper serverList, int serverId) {
+
+        int connection = serverList.getServerList().get(serverId);
+        serverList.put(serverId, --connection);
+
+    }
     
 }

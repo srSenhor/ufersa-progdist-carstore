@@ -14,6 +14,6 @@ public interface SessionService extends Remote {
     SecretKey getAESKey(String username) throws RemoteException;
     void openSession(String username, SessionLogin login) throws RemoteException;
     void closeSession(String username) throws RemoteException;
-    
+    void echo(String username, SessionLogin login) throws RemoteException;
 
 }

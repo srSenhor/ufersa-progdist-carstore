@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import br.edu.ufersa.entities.Car;
 import br.edu.ufersa.services.implementations.skeletons.DatabaseService;
@@ -17,6 +19,7 @@ public class DatabaseServiceImpl implements DatabaseService {
     private static ConcurrentHashMap<Long, Car> cars;
     private static ConcurrentHashMap<String, Integer> carsStock;
     private static DatabaseServiceImpl instance;
+    private static ExecutorService executor;
     
     private DatabaseServiceImpl() {
         cars = new ConcurrentHashMap<>();
@@ -193,23 +196,106 @@ public class DatabaseServiceImpl implements DatabaseService {
     }
 
     private void init() {
-        try {
 
-            this.create(CarType.EXECUTIVE, 14926874359l, "audi a3", 2019, 50000f);
-            this.create(CarType.ECONOMY, 72439120382l, "nissan march", 2012, 86000f);
-            this.create(CarType.INTERMEDIATE, 51029874625l, "toyota etios", 2017, 70000f);
-            this.create(CarType.ECONOMY, 14243939238l, "ford ka", 2009, 90000f);
-            this.create(CarType.EXECUTIVE, 29018475092l, "chevrolet cruze", 2021, 40000f);
-            this.create(CarType.ECONOMY, 73849201742l, "nissan march", 2015, 65000f);
-            this.create(CarType.EXECUTIVE, 45829637102l, "toyota corolla", 2022, 42000f);
-            this.create(CarType.INTERMEDIATE, 37905164293l, "ford ka sedan", 2018, 60000f);
-            this.create(CarType.EXECUTIVE, 90583274625l, "honda civic", 2020, 45000f);
-            this.create(CarType.ECONOMY, 62458390271l, "hyundai hb20s", 2012, 80000f);
-            this.create(CarType.ECONOMY, 87251903416l, "fiat novo uno", 2010, 95000f);
-            this.create(CarType.INTERMEDIATE, 18573964205l, "renault logan", 2016, 62000f);
+        executor = Executors.newCachedThreadPool();
 
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.EXECUTIVE, 14926874359l, "audi a3", 2019, 50000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+    
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.ECONOMY, 72439120382l, "nissan march", 2012, 86000f);    
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+        
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.INTERMEDIATE, 51029874625l, "toyota etios", 2017, 70000f);                    
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+        
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.ECONOMY, 87251903416l, "fiat novo uno", 2010, 95000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.ECONOMY, 62458390271l, "hyundai hb20s", 2012, 80000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.EXECUTIVE, 90583274625l, "honda civic", 2020, 45000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.INTERMEDIATE, 37905164293l, "ford ka sedan", 2018, 60000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.EXECUTIVE, 45829637102l, "toyota corolla", 2022, 42000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.ECONOMY, 73849201742l, "nissan march", 2015, 65000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.EXECUTIVE, 29018475092l, "chevrolet cruze", 2021, 40000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.ECONOMY, 14243939238l, "ford ka", 2009, 90000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.submit(() -> { 
+            try {
+                this.create(CarType.INTERMEDIATE, 18573964205l, "renault logan", 2016, 62000f);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } 
+        });
+
+        executor.shutdown();
+            
     }
 }

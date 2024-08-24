@@ -10,4 +10,5 @@ public interface AuthService extends Remote {
     SessionLogin auth(String login, String password) throws RemoteException;
     SessionLogin signup(String login, String password, UserType type) throws RemoteException;
     boolean logout(SessionLogin login) throws RemoteException;
+    void echo(SessionLogin login) throws RemoteException;
 }

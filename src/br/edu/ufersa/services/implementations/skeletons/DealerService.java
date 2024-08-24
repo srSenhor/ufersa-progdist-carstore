@@ -9,4 +9,5 @@ import br.edu.ufersa.utils.RSAKey;
 public interface DealerService extends Remote {
     Message receive(String username, Message message) throws RemoteException;
     RSAKey getPuKey() throws RemoteException;
+    void echo(String username, Message message) throws RemoteException;
 }

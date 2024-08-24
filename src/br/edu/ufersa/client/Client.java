@@ -2,6 +2,8 @@ package br.edu.ufersa.client;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -17,6 +19,7 @@ import br.edu.ufersa.entities.SessionLogin;
 import br.edu.ufersa.security.SecurityCipher;
 import br.edu.ufersa.server.gateway.GatewayService;
 import br.edu.ufersa.utils.GUI;
+import br.edu.ufersa.utils.ServicePorts;
 import br.edu.ufersa.utils.UserType;
 
 public class Client implements Serializable {
@@ -154,14 +157,6 @@ public class Client implements Serializable {
         String name = cin.nextLine();
 
         long renavam;
-
-        
-        /*
-        TODO dar um jeito da tela ficar atualizando a lista de carros
-        * Usar uma thread pra ficar recuperando o valor e outra pra ficar imprimindo?
-        */
-        // Thread t0 = new Thread(new ThreadRefresh(response, name, 0));
-        // t0.start();
         
         response.setContent(send(1, sessionLogin.getUsername(), -1, name, -1, -1, 2));
         System.out.print("""
